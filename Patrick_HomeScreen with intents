@@ -1,0 +1,252 @@
+package Nim.Package;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.*;
+import android.widget.TextView;
+import android.content.Intent;
+
+public class MainActivity extends Activity implements NimDefaults
+{
+    // Just some practice values
+    private static int pscore = 10;
+    private static int cscore = 8;
+    private static String pmessage;
+    private static String cmessage;
+    
+    public final static String PLAY_ROW = "Nim.Package.ROW";
+    public final static String PLAY_FIRST = "Nim.Package.FIRST";
+    public final static String PLAY_MODE = "Nim.Package.MODE";
+    
+    
+    /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        
+        pmessage = "Player's Score = " + pscore;
+        cmessage = "Computer's Score = " + cscore;
+        
+        TextView textview1 = (TextView) findViewById(R.id.text_playerScore);
+        textview1.setText(pmessage);
+        
+        TextView textview2 = (TextView) findViewById(R.id.text_computerScore);
+        textview2.setText(cmessage);
+        
+        setContentView(R.layout.main);
+    }
+    
+    /**
+     * Message to be sent when the player clicks on the play button.
+     * All the default values will be sent as extras.
+     * @param view the button in main.xml the method call is originating.
+     */
+    
+    public void sendPlayMessage(View view)
+    {
+        Intent intent = new Intent(this, GameScreenActivity.class);
+        int rows = DEFAULT_ROW_NUMBER;
+        String first = DEFAULT_FIRST_MOVE;
+        String mode = DEFAULT_MODE;
+        
+        intent.putExtra(PLAY_ROW, rows);
+        intent.putExtra(PLAY_FIRST, first);
+        intent.putExtra(PLAY_MODE, mode);
+        startActivity(intent);
+    }
+    
+    /**
+     * Message to be sent when the player clicks on the options button.
+     * @param view the button in main.xml the method call is originating.
+     */
+    
+    public void sendOptionsMessage(View view)
+    {
+        Intent intent = new Intent(this, OptionsActivity.class);
+        startActivity(intent);
+    }
+    
+    public void sendExitMessage(View view)
+    {
+        Intent intent = new Intent();
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+
+
+package Nim.Package;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+
+/**
+ * @author Patrick Break
+ */
+
+public class GameScreenActivity extends Activity implements NimDefaults
+{
+
+    private static int rows;
+    private static String first;
+    private static String mode;
+    
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        // Get the message from the intent
+        Intent intent = getIntent();
+        rows = intent.getIntExtra(MainActivity.PLAY_ROW, DEFAULT_ROW_NUMBER);
+        first = intent.getStringExtra(MainActivity.PLAY_FIRST);
+        mode = intent.getStringExtra(MainActivity.PLAY_MODE);
+    }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+
+
+package Nim.Package;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+/**
+ * @author Patrick Break
+ */
+public class OptionsActivity extends Activity
+{
+
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        // No getIntent method needs to be called since there is no info passed
+        // from the main activity.
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+package Nim.Package;
+
+/**
+ * @author Patrick Break
+ * 
+ * This class create some default values that will be used in the creation of the
+ * game screen.
+ */
+
+public interface NimDefaults {
+    
+    int DEFAULT_ROW_NUMBER = 5;
+    String DEFAULT_FIRST_MOVE = "Player";
+    String DEFAULT_MODE = "Single";
+    
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="Nim.Package"
+      android:versionCode="1"
+      android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="19" />
+    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+        <activity android:name="MainActivity"
+            android:label="@string/app_name">
+                 <intent-filter>
+                       <action android:name="android.intent.action.MAIN" />
+                       <category android:name="android.intent.category.LAUNCHER" />
+                 </intent-filter>
+        </activity>
+        <activity
+            android:name="Nim.Package.OptionsActivity"
+            android:parentActivityName="Nim.Package.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="Nim.Package.MainActivity" />
+        </activity>
+        <activity
+            android:name="Nim.Package.GameScreenActivity"
+            android:parentActivityName="Nim.Package.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="Nim.Package.MainActivity" />
+        </activity>
+    </application>
+</manifest>
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_play"
+        android:onClick="sendPlayMessage"
+    />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_options"
+        android:onClick="sendOptionsMessage"
+    />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_exit"
+        android:onClick="sendExitMessage"
+    />
+    <TextView android:id="@+id/text_playerScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_playerScore"
+    />
+    <TextView android:id="@+id/text_computerScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_computerScore"
+    />
+</LinearLayout>
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MainActivity</string>
+    <string name="button_play">PLAY</string>
+    <string name="button_options">OPTIONS</string>
+    <string name="button_exit">EXIT</string>
+    <string name="text_playerScore">Player Score = %d</string>
+    <string name="text_computerScore">Computer Score = %d</string>
+</resources>
