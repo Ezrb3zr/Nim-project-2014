@@ -1,0 +1,304 @@
+package Nim.Package;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.*;
+import android.widget.TextView;
+import android.content.Intent;
+import java.io.*;
+import java.util.Scanner;
+import android.content.Context;
+
+public class MainActivity extends Activity implements NimDefaults
+{
+    // Just some practice values
+    public static int pscore;
+    public static int cscore;
+    private static String pmessage;
+    private static String cmessage;
+    
+    public static Scanner finput; // for reading a file
+    public static FileOutputStream foutput; // for writing to a file
+    
+    
+    public final static String PLAY_ROW = "Nim.Package.ROW";
+    public final static String PLAY_FIRST = "Nim.Package.FIRST";
+    public final static String PLAY_MODE = "Nim.Package.MODE";
+    
+    
+    /** Called when the activity is first created. */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        
+        setContentView(R.layout.main);
+        
+        
+        
+        ///////////////////////////////////////////////////////////////
+        /*
+         *   
+
+Place your text file in the /assets directory under the Android project. Use AssetManager class to access it.
+
+AssetManager am = context.getAssets();
+InputStream is = am.open("test.txt");
+
+Or you can also put the file in the /res/raw directory, where the file will be indexed and is accessible by an id in the R file:
+
+InputStream is = getResources().openRawResource(R.raw.test);
+
+
+         */
+        
+        
+        try
+        {
+            // Read from file to get the scores
+            finput = new Scanner(new File(context.getFilesDir(), SCORES_FILE));
+            
+            pscore = finput.nextInt();
+            cscore = finput.nextInt();
+            
+            finput.close();
+        }
+        catch (FileNotFoundException ex) // file could not be found
+        {
+            pscore = 0;
+            cscore = 0;
+        }
+        
+        pmessage = "Player's Score = " + pscore;
+        cmessage = "Computer's Score = " + cscore;
+        
+        TextView textview1 = (TextView) findViewById(R.id.text_playerScore);
+        textview1.setText(pmessage);
+        
+        TextView textview2 = (TextView) findViewById(R.id.text_computerScore);
+        textview2.setText(cmessage);
+    }
+    
+    /**
+     * Message to be sent when the player clicks on the play button.
+     * All the default values will be sent as extras.
+     * @param view the button in main.xml the method call is originating.
+     */
+    
+    public void sendPlayMessage(View view)
+    {
+        Intent intent = new Intent(this, GameScreenActivity.class);
+        int rows = DEFAULT_ROW_NUMBER;
+        int first = DEFAULT_FIRST_MOVE;
+        int mode = DEFAULT_MODE;
+        
+        intent.putExtra(PLAY_ROW, rows);
+        intent.putExtra(PLAY_FIRST, first);
+        intent.putExtra(PLAY_MODE, mode);
+        startActivity(intent);
+    }
+    
+    /**
+     * Message to be sent when the player clicks on the options button.
+     * @param view the button in main.xml the method call is originating.
+     */
+    
+    public void sendOptionsMessage(View view)
+    {
+        Intent intent = new Intent(this, OptionsActivity.class);
+        startActivity(intent);
+    }
+    
+    /**
+     * Message to be sent when the player clicks on the exit button.
+     * @param view the button in main.xml the method call is originating.
+     */
+    
+    public void sendExitMessage(View view)
+    {
+        Intent intent = new Intent();
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
+    }
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+package Nim.Package;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * @author Patrick Break
+ */
+
+public class GameScreenActivity extends Activity implements NimDefaults
+{
+
+    private static int rows;
+    private static int first;
+    private static int mode;
+    
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        // Get the message from the intent
+        Intent intent = getIntent();
+        rows = intent.getIntExtra(MainActivity.PLAY_ROW, DEFAULT_ROW_NUMBER);
+        first = intent.getIntExtra(MainActivity.PLAY_FIRST, 1);
+        mode = intent.getIntExtra(MainActivity.PLAY_MODE, 1);
+    }
+    
+    @Override
+    public void onBackPressed()
+    {
+        // change score
+        MainActivity.cscore++;
+        try
+        {
+            MainActivity.foutput = openFileOutput(SCORES_FILE, Context.MODE_PRIVATE);
+            String scores = MainActivity.pscore + "\n" + MainActivity.cscore;
+            MainActivity.foutput.write(scores.getBytes());
+            MainActivity.foutput.close();
+        }     
+        catch(IOException IOE)
+        {    
+            // first create the file, then save the scores to it
+            File file = new File(context.getFileDir(), SCORES_FILE);
+            try
+            {
+                MainActivity.foutput = openFileOutput(SCORES_FILE, Context.MODE_PRIVATE);
+                String scores = MainActivity.pscore + "\n" + MainActivity.cscore;
+                MainActivity.foutput.write(scores.getBytes());
+                MainActivity.foutput.close();
+            }
+            catch (IOException e)
+            {
+                MainActivity.foutput = null;
+            }
+        }
+        this.finish();
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+package Nim.Package;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * @author Patrick Break
+ */
+
+public class NotificationActivity extends Activity implements NimDefaults
+{
+
+    private static int rows;
+    private static int first;
+    private static int mode;
+    
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // get intents for mode
+        Intent intent = getIntent();
+        rows = intent.getIntExtra(MainActivity.PLAY_ROW, DEFAULT_ROW_NUMBER);
+        first = intent.getIntExtra(MainActivity.PLAY_FIRST, 1);
+        mode = intent.getIntExtra(MainActivity.PLAY_MODE, 1);
+        setContentView(R.layout.notification);
+        
+        
+        String pmessage = "Player's Score = " + MainActivity.pscore;
+        String cmessage = "Computer's Score = " + MainActivity.cscore;
+        
+        TextView textview1 = (TextView) findViewById(R.id.text_playerScore);
+        textview1.setText(pmessage);
+        
+        TextView textview2 = (TextView) findViewById(R.id.text_computerScore);
+        textview2.setText(cmessage);
+        
+        // Write out new Scores to the text file
+        try
+        {
+            MainActivity.foutput = openFileOutput(SCORES_FILE, Context.MODE_PRIVATE);
+            String scores = MainActivity.pscore + "\n" + MainActivity.cscore;
+            MainActivity.foutput.write(scores.getBytes());
+            MainActivity.foutput.close();
+        }     
+        catch(IOException IOE)
+        {    
+            // first create the file, then save the scores to it
+            File file = new File(context.getFileDir(), SCORES_FILE);
+            try
+            {
+                MainActivity.foutput = openFileOutput(SCORES_FILE, Context.MODE_PRIVATE);
+                String scores = MainActivity.pscore + "\n" + MainActivity.cscore;
+                MainActivity.foutput.write(scores.getBytes());
+                MainActivity.foutput.close();
+            }
+            catch (IOException e)
+            {
+                MainActivity.foutput = null;
+            }
+        }
+    }
+    
+    
+    public void sendOkMessage(View view)
+    {
+        // single game
+        // go to home screen
+        if (mode == 1)
+        {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+        
+        // continuous
+        // go to game screen
+        else
+        {
+            Intent intent = new Intent(this, GameScreenActivity.class);
+            intent.putExtra(MainActivity.PLAY_ROW, rows);
+            intent.putExtra(MainActivity.PLAY_FIRST, first);
+            intent.putExtra(MainActivity.PLAY_MODE, mode);
+            startActivity(intent);
+        }
+    }
+    
+    
+    public void sendHomeMessage(View view)
+    {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+}
+
