@@ -1,0 +1,31 @@
+finput = null;
+        BufferedReader bufReader = null;
+        try
+        {
+            // Read from file to get the scores
+
+            finput = openFileInput(SCORES_FILE);
+            bufReader = new BufferedReader(new InputStreamReader(finput));
+            String line = bufReader.readLine();
+            int i = 0;
+            while(line != null)
+            {
+                line = bufReader.readLine();
+                if (i == 0)
+                    pscore = Integer.parseInt(line);
+                else
+                    cscore = Integer.parseInt(line);
+                i++;
+            }
+            
+            bufReader.close();
+            finput.close();
+        }
+        catch (FileNotFoundException ex) // file could not be found
+        {
+            pscore = 0;
+            cscore = 0;
+        } catch (IOException ex)
+        {
+            Logger.getLogger(MainActivity.class.getName()).log(Level.SEVERE, null, ex);
+        }
